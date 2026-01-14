@@ -58,13 +58,10 @@ export function ProfileScreen() {
   };
 
   const openScan = (item: any) => {
-    navigation.navigate("Results", {
-      skinType: item.skinType,
-      confidence: item.confidence,
-      capturedUri: item.capturedUri,
-      faceCount: item.faceCount,
-    });
-  };
+  navigation.navigate("Results", {
+    ...item
+  });
+};
 
   const confirmDeleteOne = (id: string) => {
     Alert.alert("Delete this scan?", "This will remove it from your history.", [
@@ -209,8 +206,8 @@ export function ProfileScreen() {
           ) : (
             <>
               <View style={{ flexDirection: "row", gap: 10, flexWrap: "wrap" }}>
-                <Badge kind="match" label={`${latest.skinType} Skin`} />
-                <Badge kind="safe" label={`${Math.round(latest.confidence * 100)}% Confidence`} />
+                <Badge kind="match" label={`${latest.skin_type} Skin`} />
+                <Badge kind="safe" label={`${Math.round(latest.confidence_scores * 100)}% Confidence`} />
               </View>
 
               <Text style={[Type.cap, { color: Colors.textSecondary }]}>
@@ -382,8 +379,8 @@ export function ProfileScreen() {
 
                     <View style={{ flex: 1, gap: 6 }}>
                       <View style={{ flexDirection: "row", gap: 8, flexWrap: "wrap" }}>
-                        <Badge kind="match" label={item.skinType} />
-                        <Badge kind="safe" label={`${Math.round(item.confidence * 100)}%`} />
+                        <Badge kind="match" label={item.skin_type} />
+                        <Badge kind="safe" label={`${Math.round(item.confidence_scores * 100)}%`} />
                       </View>
                       <Text style={[Type.cap, { color: Colors.textSecondary }]}>
                         {new Date(item.scannedAt).toLocaleString()}

@@ -4,7 +4,8 @@ import { CameraView, CameraType, useCameraPermissions } from "expo-camera";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback } from "react";
 import { Colors } from "../theme/colors";
 import { Type } from "../theme/typography";
 import { Card } from "../components/Card";
@@ -54,6 +55,18 @@ export function ScanScreen() {
     if (!permission.granted) return "Camera permission is required to scan.";
     return "Good lighting • Face centered • No glasses";
   }, [permission]);
+
+
+useFocusEffect(
+  useCallback(() => {
+    // Reset the scan state when coming back
+    setStep("camera");
+    setBusy(false);
+    setHint(null);
+    setFaceOk(null);
+    setPreviewUri(null);
+  }, [])
+);
 
   const toggleFacing = () => setFacing((p) => (p === "front" ? "back" : "front"));
 
@@ -106,66 +119,158 @@ export function ScanScreen() {
     setStep("camera");
   };
 
-  const onContinue = async () => {
-    if (!previewUri) return;
+  // const onContinue = async () => {
+  //   if (!previewUri) return;
 
-    setHint(null);
-    setFaceOk(null);
-    setStep("processing");
-    setBusy(true);
+  //   setHint(null);
+  //   setFaceOk(null);
+  //   setStep("processing");
+  //   setBusy(true);
 
-    try {
-      const face = await runFaceCheckOnImage(previewUri);
-      console.log("Face detection result:", face);
-      if (face.available) {
-        if (face.count !== 1) {
-          setFaceOk(false);
-          setHint(
-            face.count === 0
-              ? "No face detected. Retake with your face inside the guide."
-              : "Multiple faces detected. Please scan with one face only."
-          );
-          setStep("preview");
-          return;
-        }
-        setFaceOk(true);
-      } else {
-        setHint("Face detection not available. Continuing without it.");
+  //   try {
+  //     const face = await runFaceCheckOnImage(previewUri);
+  //     console.log("Face detection result:", face);
+  //     if (face.available) {
+  //       if (face.count !== 1) {
+  //         setFaceOk(false);
+  //         setHint(
+  //           face.count === 0
+  //             ? "No face detected. Retake with your face inside the guide."
+  //             : "Multiple faces detected. Please scan with one face only."
+  //         );
+  //         setStep("preview");
+  //         return;
+  //       }
+  //       setFaceOk(true);
+  //     } else {
+  //       setHint("Face detection not available. Continuing without it.");
+  //     }
+
+  //     // ✅ TODO: replace with your real AI inference
+  //     const result = {
+  //       skinType: "Combination",
+  //       confidence: 0.92,
+  //       capturedUri: previewUri,
+  //       faceCount: face.available ? face.count : undefined,
+  //       scannedAt: new Date().toISOString(),
+  //     };
+
+  //     // ✅ Save globally so Home/Routine auto-update
+  //     const saved = addScan({
+  //       skinType: result.skinType,
+  //       confidence: result.confidence,
+  //       capturedUri: result.capturedUri,
+  //       faceCount: result.faceCount,
+  //       scannedAt: result.scannedAt,
+  //     });
+
+  //   setTimeout(() => {
+  //       navigation.navigate("Results", {
+  //       skinType: result.skinType,
+  //       confidence: result.confidence,
+  //       capturedUri: result.capturedUri, 
+  //       faceCount: result.faceCount,
+  //     });
+  //   }, 5000); // Simulate processing delay
+  //   } catch {
+  //     setHint("Scan failed. Please try again.");
+  //     setStep("preview");
+  //   } finally {
+  //     setBusy(false);
+  //   }
+  // };
+const onContinue = async () => {
+  if (!previewUri) return;
+
+  setHint(null);
+  setFaceOk(null);
+  setStep("processing");
+  setBusy(true);
+
+  try {
+    // 1️⃣ Optional local face check
+    const face = await runFaceCheckOnImage(previewUri);
+    console.log("Face detection result:", face);
+
+    if (face.available) {
+      if (face.count !== 1) {
+        setFaceOk(false);
+        setHint(
+          face.count === 0
+            ? "No face detected. Retake with your face inside the guide."
+            : "Multiple faces detected. Please scan with one face only."
+        );
+        setStep("preview");
+        return;
       }
-
-      // ✅ TODO: replace with your real AI inference
-      const result = {
-        skinType: "Combination",
-        confidence: 0.92,
-        capturedUri: previewUri,
-        faceCount: face.available ? face.count : undefined,
-        scannedAt: new Date().toISOString(),
-      };
-
-      // ✅ Save globally so Home/Routine auto-update
-      const saved = addScan({
-        skinType: result.skinType,
-        confidence: result.confidence,
-        capturedUri: result.capturedUri,
-        faceCount: result.faceCount,
-        scannedAt: result.scannedAt,
-      });
-
-    setTimeout(() => {
-        navigation.navigate("Results", {
-        skinType: result.skinType,
-        confidence: result.confidence,
-        capturedUri: result.capturedUri, 
-        faceCount: result.faceCount,
-      });
-    }, 5000); // Simulate processing delay
-    } catch {
-      setHint("Scan failed. Please try again.");
-      setStep("preview");
-    } finally {
-      setBusy(false);
+      setFaceOk(true);
+    } else {
+      setHint("Face detection not available. Continuing without it.");
     }
-  };
+
+    // 2️⃣ Upload image to backend
+    const formData = new FormData();
+    formData.append("image", {
+      uri: previewUri,
+      type: "image/jpeg",
+      name: "face.jpg",
+    } as any); // TS fix
+
+    const response = await fetch("https://gemini-face-analysis-backend.onrender.com/analyze-face", {
+      method: "POST",
+      body: formData,
+      headers: {
+        // NOTE: Remove this line in React Native for multipart/form-data
+         "Content-Type": "multipart/form-data",
+      },
+    });
+
+    // 3️⃣ Get raw response first
+    const responseText = await response.text();
+    console.log("Raw backend response:", responseText);
+
+    let result;
+    try {
+      result = JSON.parse(responseText);
+    } catch (jsonErr) {
+      console.error("Failed to parse JSON:", jsonErr);
+      setHint("Unexpected server response. Please try again.");
+      setStep("preview");
+      return;
+    }
+
+    if (!result.success) {
+      setHint("Skin analysis failed. Try again.");
+      setStep("preview");
+      return;
+    }
+
+    console.log("AI skin analysis result:", result.analysis);
+
+    // 4️⃣ Save globally
+    addScan({
+      ...result.analysis,
+      capturedUri: previewUri,
+      faceCount: face.available ? face.count : undefined,
+      scannedAt: new Date().toISOString(),
+    });
+
+    // 5️⃣ Navigate to results
+    navigation.navigate("Results", {
+      ...result.analysis,
+      capturedUri: previewUri,
+      faceCount: face.available ? face.count : undefined,
+    });
+
+  } catch (err) {
+    console.error("Scan error:", err);
+    setHint("Scan failed. Please try again.");
+    setStep("preview");
+  } finally {
+    setBusy(false);
+  }
+};
+
 
   return (
     <Screen>

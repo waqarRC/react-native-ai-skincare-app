@@ -16,7 +16,24 @@ export type RootStackParamList = {
   Budget: undefined;
   MainTabs: undefined;
   Compare: undefined;
-  Results: { skinType: string; confidence: number; capturedUri?: string; faceCount?: number };
+  Results: {
+    skin_type: string;
+    acne_level: string;
+    oiliness: string;
+    dryness: string;
+    redness: string;
+    dark_circles: string;
+    fine_lines: string;
+    pores: string;
+    face_detected: any;
+    confidence_scores: any;
+    overall_skin_health: string;
+    skincare_advice: string[];
+    recommended_products: any;
+    capturedUri?: string;
+    faceCount?: number;
+};
+
   ProductsDetail: { productId: string };
 };
 

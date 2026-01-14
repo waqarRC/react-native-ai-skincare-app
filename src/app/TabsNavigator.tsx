@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Pressable, Text, StyleSheet } from "react-native";
+import { View, Pressable, Text, StyleSheet, Platform } from "react-native";
 import { BottomTabBarButtonProps, createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -58,7 +58,7 @@ export function TabsNavigator() {
         tabBarActiveTintColor: Palette.primary,
         tabBarInactiveTintColor: "rgba(11,18,32,0.5)",
         tabBarStyle: {
-          height: 78,
+          height: Platform.OS === "android" ? 90 : 78,
           paddingBottom: 10,
           paddingTop: 8,
           borderTopColor: Palette.border,

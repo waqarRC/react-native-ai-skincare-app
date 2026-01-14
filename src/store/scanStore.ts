@@ -3,15 +3,24 @@ import { persist, createJSONStorage } from "zustand/middleware";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export type ScanResult = {
-  id: string;
-  skinType: string;
-  confidence: number;
-  capturedUri?: string;
-  faceCount?: number;
-  scannedAt: string;
-
+    id: string;
+    skin_type: string;
+    acne_level: string;
+    oiliness: string;
+    dryness: string;
+    redness: string;
+    dark_circles: string;
+    fine_lines: string;
+    pores: string;
+    overall_skin_health: string;
+    skincare_advice?: string[];
+    capturedUri?: string;
+    face_detected?: boolean;
+    confidence_scores?: any;
+    scannedAt: string;
   // ✅ new
   concerns?: { key: string; score: number }[]; // e.g. [{key:'acne', score:0.72}]
+  recommended_products?: { name: string; brand: string,reason:string,type:string }[]; // e.g. [{key:'acne', score:0.72}]
   avoidTags?: string[]; // e.g. ['fragrance','alcohol_denat']
 };
 
