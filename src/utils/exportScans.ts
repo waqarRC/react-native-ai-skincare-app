@@ -32,15 +32,15 @@ function makeFullReportHtml(params: {
 
   const historyRows = payload.history
     .map((x) => {
-      const conf = `${Math.round(x.confidence * 100)}%`;
-      const face = typeof x.faceCount === "number" ? x.faceCount : "";
+      const conf = `${Math.round(x.confidence_scores * 100)}%`;
+      const face = x.face_detected ? "Yes": "No";
       const date = new Date(x.scannedAt).toLocaleString();
-      const thumb = historyThumbs?.[x.id];
-
+      const thumb = "https://placehold.co/240x300.png?text=Gentle+Cleanser";//x?.capturedUri;
+      console.log(payload.history,"thumb--------------------------?")
       return `
         <tr>
           <td style="width:62px;">${thumb ? `<img class="thumb" src="${thumb}" />` : ""}</td>
-          <td>${escapeHtml(x.skinType)}</td>
+          <td>${escapeHtml(x.skin_type)}</td>
           <td>${conf}</td>
           <td>${face}</td>
           <td>${escapeHtml(date)}</td>
@@ -159,8 +159,8 @@ function makeFullReportHtml(params: {
           <div><b>Latest scan</b></div>
           ${
             latest
-              ? `<span class="badge">${escapeHtml(latest.skinType)} • ${Math.round(
-                  latest.confidence * 100
+              ? `<span class="badge">${escapeHtml(latest.skin_type)} • ${Math.round(
+                  latest.confidence_scores * 100
                 )}%</span>`
               : `<span class="badge">None</span>`
           }
@@ -176,12 +176,12 @@ function makeFullReportHtml(params: {
             ${
               latestImgDataUrl
                 ? `<div class="imgWrap"><img src="${latestImgDataUrl}" /></div>`
-                : `<div class="imgWrap"></div>`
+                : `<div class="imgWrap"><img src="${'https://placehold.co/240x300.png?text=Gentle+Cleanser'}" /></div>`
             }
             <div style="flex:1;">
-              <div class="muted">Confidence: ${Math.round(latest.confidence * 100)}%</div>
+              <div class="muted">Confidence: ${Math.round(latest.confidence_scores * 100)}%</div>
               <div class="muted">Faces detected: ${
-                typeof latest.faceCount === "number" ? latest.faceCount : "N/A"
+                 latest.face_detected ? "Yes": "No"
               }</div>
               <div class="muted">Note: Not a medical diagnosis.</div>
             </div>
@@ -222,6 +222,7 @@ export async function exportFullReportPDF(
   payload: ExportPayload,
   options?: FullReportOptions
 ) {
+  console.log(payload,"payload---------------------")
   const latestImgDataUrl = await uriToBase64DataUrl(payload.latest?.capturedUri);
 
   let historyThumbs: Record<string, string> | undefined = undefined;
@@ -296,11 +297,11 @@ function makePdfHtml(ctx: {
 
   const historyRows = payload.history
     .map((x) => {
-      const conf = `${Math.round(x.confidence * 100)}%`;
-      const face = typeof x.faceCount === "number" ? x.faceCount : "";
+      const conf = `${Math.round(x.confidence_scores * 100)}%`;
+      const face =  x.face_detected ? "Yes": "No";
       return `
         <tr>
-          <td>${x.skinType}</td>
+          <td>${x.skin_type}</td>
           <td>${conf}</td>
           <td>${face}</td>
           <td>${new Date(x.scannedAt).toLocaleString()}</td>
@@ -331,7 +332,7 @@ function makePdfHtml(ctx: {
       <div class="card">
         <div style="display:flex;justify-content:space-between;align-items:center;">
           <div><b>Latest scan</b></div>
-          ${latest ? `<span class="badge">${latest.skinType} • ${Math.round(latest.confidence * 100)}%</span>` : `<span class="badge">None</span>`}
+          ${latest ? `<span class="badge">${latest.skin_type} • ${Math.round(latest.confidence_scores * 100)}%</span>` : `<span class="badge">None</span>`}
         </div>
         ${
           latest

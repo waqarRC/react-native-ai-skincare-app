@@ -216,7 +216,7 @@ const onContinue = async () => {
       name: "face.jpg",
     } as any); // TS fix
 
-    const response = await fetch("https://gemini-face-analysis-backend.onrender.com/analyze-face", {
+    const response = await fetch("https://gemini-face-analysis-backend-pfbm.onrender.com/analyze-face", {
       method: "POST",
       body: formData,
       headers: {
