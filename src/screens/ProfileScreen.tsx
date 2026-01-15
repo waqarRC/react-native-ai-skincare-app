@@ -206,8 +206,8 @@ export function ProfileScreen() {
           ) : (
             <>
               <View style={{ flexDirection: "row", gap: 10, flexWrap: "wrap" }}>
-                <Badge kind="match" label={`${latest.skin_type} Skin`} />
-                <Badge kind="safe" label={`${Math.round(latest.confidence_scores * 100)}% Confidence`} />
+                <Badge kind="match" label={latest?.skin_type ? `${latest.skin_type} Skin` : "N/A"} />
+                <Badge kind="safe" label={latest?.confidence_scores ? `${Math.round(latest.confidence_scores * 100)}% Confidence` : 'No Face Detected'} />
               </View>
 
               <Text style={[Type.cap, { color: Colors.textSecondary }]}>
@@ -379,8 +379,8 @@ export function ProfileScreen() {
 
                     <View style={{ flex: 1, gap: 6 }}>
                       <View style={{ flexDirection: "row", gap: 8, flexWrap: "wrap" }}>
-                        <Badge kind="match" label={item.skin_type} />
-                        <Badge kind="safe" label={`${Math.round(item.confidence_scores * 100)}%`} />
+                        <Badge kind="match" label={item?.skin_type ? `${item.skin_type} Skin` : "N/A"} />
+                        <Badge kind="safe" label={ item?.confidence_scores ? `${Math.round(item.confidence_scores * 100)}%` : 'No Face Detected'} />
                       </View>
                       <Text style={[Type.cap, { color: Colors.textSecondary }]}>
                         {new Date(item.scannedAt).toLocaleString()}
