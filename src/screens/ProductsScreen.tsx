@@ -136,7 +136,6 @@ export function ProductsScreen() {
             borderWidth: 1,
             borderColor: Colors.border,
             paddingHorizontal: Spacing.md,
-            paddingVertical: Spacing.sm,
             flexDirection: "row",
             alignItems: "center",
             gap: 10,
@@ -148,7 +147,7 @@ export function ProductsScreen() {
             onChangeText={setQuery}
             placeholder="Search products, brands, ingredients…"
             placeholderTextColor={Colors.textMuted}
-            style={{ flex: 1, color: Colors.textPrimary, fontSize: 14, fontWeight: "600" }}
+            style={{ flex: 1, color: Colors.textPrimary, fontSize: 14, fontWeight: "600",padding:0}}
           />
           {!!query && (
             <Pressable onPress={() => setQuery("")} style={{ padding: 6 }}>
